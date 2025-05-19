@@ -1,0 +1,98 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Products</h5>
+                <p class="card-text display-4">{{ product_count }}</p>
+                <a href="{% url 'product_list' %}" class="btn btn-light">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Customers</h5>
+                <p class="card-text display-4">{{ customer_count }}</p>
+                <a href="{% url 'customer_list' %}" class="btn btn-light">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Orders</h5>
+                <p class="card-text display-4">{{ recent_orders.count }}</p>
+                <a href="{% url 'order_list' %}" class="btn btn-light">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <a href="{% url 'product_create' %}" class="btn btn-light mb-2">Add Product</a>
+                <a href="{% url 'order_create' %}" class="btn btn-light">Create Order</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Featured Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for product in featured_products %}
+                    <a href="{% url 'product_detail' product.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ product.name }}</h5>
+                            <small>${{ product.price }}</small>
+                        </div>
+                        <p class="mb-1">{{ product.size }} - {{ product.color }}</p>
+                        <small>Stock: {{ product.stock_quantity }}</small>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">No products available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Orders</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for order in recent_orders %}
+                    <a href="{% url 'order_detail' order.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Order #{{ order.id }}</h5>
+                            <small>{{ order.order_date|date:"M d, Y" }}</small>
+                        </div>
+                        <p class="mb-1">{{ order.customer.full_name }}</p>
+                        <div class="d-flex w-100 justify-content-between">
+                            <small>${{ order.total_amount }}</small>
+                            <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Shipped' %}info{% elif order.status == 'Pending' %}warning{% else %}danger{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted">No orders available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

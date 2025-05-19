@@ -1,0 +1,144 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ title }}</h1>
+    <a href="{% url 'order_list' %}" class="btn btn-secondary">Back to List</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="{{ order_form.customer.id_for_label }}" class="form-label">Customer</label>
+                {{ order_form.customer.errors }}
+                <select name="{{ order_form.customer.name }}" id="{{ order_form.customer.id_for_label }}"
+                        class="form-select {% if order_form.customer.errors %}is-invalid{% endif %}">
+                    <option value="" {% if not order_form.customer.value %}selected{% endif %}>Select Customer</option>
+                    {% for choice in order_form.fields.customer.queryset %}
+                    <option value="{{ choice.id }}" {% if order_form.customer.value|stringformat:"s" == choice.id|stringformat:"s" %}selected{% endif %}>
+                        {{ choice.full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ order_form.status.id_for_label }}" class="form-label">Status</label>
+                {{ order_form.status.errors }}
+                <select name="{{ order_form.status.name }}" id="{{ order_form.status.id_for_label }}"
+                        class="form-select {% if order_form.status.errors %}is-invalid{% endif %}">
+                    {% for choice in order_form.fields.status.choices %}
+                    <option value="{{ choice.0 }}" {% if order_form.status.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <h3 class="mt-4 mb-3">Order Items</h3>
+
+            {{ item_formset.management_form }}
+
+            <div id="order-items">
+                {% for form in item_formset %}
+                <div class="order-item card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.product.id_for_label }}" class="form-label">Product</label>
+                                {{ form.product.errors }}
+                                <select name="{{ form.product.html_name }}" id="{{ form.product.id_for_label }}"
+                                        class="form-select product-select {% if form.product.errors %}is-invalid{% endif %}">
+                                    <option value="" {% if not form.product.value %}selected{% endif %}>Select Product</option>
+                                    {% for choice in form.fields.product.queryset %}
+                                    <option value="{{ choice.id }}"
+                                            data-price="{{ choice.price }}"
+                                            {% if form.product.value|stringformat:"s" == choice.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ choice.name }} - {{ choice.size }} - {{ choice.color }} (${{ choice.price }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label">Quantity</label>
+                                {{ form.quantity.errors }}
+                                <input type="number" name="{{ form.quantity.html_name }}" id="{{ form.quantity.id_for_label }}"
+                                       class="form-control quantity-input {% if form.quantity.errors %}is-invalid{% endif %}"
+                                       value="{{ form.quantity.value|default:'1' }}" min="1">
+                            </div>
+
+                            <div class="col-md-2 mb-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-danger remove-item">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                <button type="button" id="add-item" class="btn btn-secondary">Add Another Item</button>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Create Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Add new item
+        $('#add-item').click(function() {
+            var formCount = parseInt($('#id_items-TOTAL_FORMS').val());
+            var newForm = $('.order-item').first().clone();
+
+            // Update form index
+            newForm.find(':input').each(function() {
+                var name = $(this).attr('name');
+                if (name) {
+                    name = name.replace('-0-', '-' + formCount + '-');
+                    $(this).attr('name', name);
+                }
+
+                var id = $(this).attr('id');
+                if (id) {
+                    id = id.replace('-0-', '-' + formCount + '-');
+                    $(this).attr('id', id);
+                }
+            });
+
+            // Clear values
+            newForm.find('select').val('');
+            newForm.find('input[type="number"]').val(1);
+
+            // Add to DOM
+            $('#order-items').append(newForm);
+
+            // Update form count
+            $('#id_items-TOTAL_FORMS').val(formCount + 1);
+        });
+
+        // Remove item
+        $(document).on('click', '.remove-item', function() {
+            var items = $('.order-item');
+            if (items.length > 1) {
+                $(this).closest('.order-item').remove();
+
+                // Update form count
+                var formCount = parseInt($('#id_items-TOTAL_FORMS').val());
+                $('#id_items-TOTAL_FORMS').val(formCount - 1);
+            } else {
+                alert('At least one item is required.');
+            }
+        });
+    });
+</script>
+{% endblock %}
