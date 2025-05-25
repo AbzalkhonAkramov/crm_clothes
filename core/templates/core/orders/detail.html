@@ -39,7 +39,7 @@
                     </tr>
                     <tr>
                         <th>Total Amount:</th>
-                        <td>${{ order.total_amount }}</td>
+                        <td>&{{ order.total_amount }}</td>
                     </tr>
                 </table>
             </div>
@@ -102,7 +102,7 @@
                         </td>
                         <td>{{ item.product.size }}</td>
                         <td>{{ item.product.color }}</td>
-                        <td>${{ item.price }}</td>
+                        <td>&{{ item.price }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>${{ item.subtotal }}</td>
                     </tr>

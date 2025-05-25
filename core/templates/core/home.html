@@ -54,7 +54,7 @@
                     <a href="{% url 'product_detail' product.pk %}" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">{{ product.name }}</h5>
-                            <small>${{ product.price }}</small>
+                            <small>&{{ product.price }}</small>
                         </div>
                         <p class="mb-1">{{ product.size }} - {{ product.color }}</p>
                         <small>Stock: {{ product.stock_quantity }}</small>
@@ -81,7 +81,7 @@
                         </div>
                         <p class="mb-1">{{ order.customer.full_name }}</p>
                         <div class="d-flex w-100 justify-content-between">
-                            <small>${{ order.total_amount }}</small>
+                            <small>&{{ order.total_amount }}</small>
                             <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Shipped' %}info{% elif order.status == 'Pending' %}warning{% else %}danger{% endif %}">
                                 {{ order.status }}
                             </span>

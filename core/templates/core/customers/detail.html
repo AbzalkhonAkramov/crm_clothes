@@ -51,7 +51,7 @@
                             <small>{{ order.order_date|date:"M d, Y" }}</small>
                         </div>
                         <div class="d-flex w-100 justify-content-between">
-                            <p class="mb-1">${{ order.total_amount }}</p>
+                            <p class="mb-1">&{{ order.total_amount }}</p>
                             <span class="badge bg-{% if order.status == 'Delivered' %}success{% elif order.status == 'Shipped' %}info{% elif order.status == 'Pending' %}warning{% else %}danger{% endif %}">
                                 {{ order.status }}
                             </span>
