@@ -1,0 +1,37 @@
+image: python:3.11  # Adjust Python version
+
+stages:
+  - test
+  - deploy
+
+variables:
+  DJANGO_SETTINGS_MODULE: crm_clothes.settings
+  AWS_SSH_KEY: /tmp/aws_key.pem
+  REMOTE_HOST: ubuntu@13.60.217.128
+  APP_DIR: /home/ubuntu/crm_clothes
+
+before_script:
+  - pip install poetry  # or pipenv, or pip
+  - poetry install      # or `pip install -r requirements.txt`
+
+test:
+  stage: test
+  script:
+    - python manage.py check
+    - python manage.py test
+
+deploy_production:
+  stage: deploy
+  only:
+    - main  # only run when main branch is pushed
+  script:
+    - echo "$SSH_PRIVATE_KEY" > $AWS_SSH_KEY
+    - chmod 600 $AWS_SSH_KEY
+    - ssh -o StrictHostKeyChecking=no -i $AWS_SSH_KEY $REMOTE_HOST "
+        cd $APP_DIR &&
+        git pull &&
+        source venv/bin/activate &&
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        sudo systemctl restart gunicorn
+      "
